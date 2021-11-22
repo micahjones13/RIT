@@ -12,7 +12,14 @@ function ruxChange(element: Document | Element | Window, value: string) {
 }
 
 function ruxInput(element: Document | Element | Window, value: string) {
-  fireEvent(element, new CustomEvent("ruxinput"));
+  fireEvent(
+    element,
+    new CustomEvent("ruxinput", {
+      detail: {
+        value,
+      },
+    })
+  );
 }
 
 export const ruxFireEvent = Object.assign(fireEvent, {

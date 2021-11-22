@@ -1,15 +1,24 @@
 import React from "react";
-import { render, act, waitFor } from "@testing-library/react";
+import {
+  render,
+  act,
+  waitFor,
+  getByLabelText,
+  getByText,
+  findByDisplayValue,
+  waitForElementToBeRemoved,
+  queryByAttribute,
+} from "@testing-library/react";
 import { ruxFireEvent as fireEvent } from "../utils";
 
 import App from "../App";
 
-// const loginForm = await findByTestId("login-form");
-
+// Also want error-text to show up in tests when applicable
 describe("RuxInput", () => {
-  test("Should be typed into", async () => {
+  test("Should change with fireEvent", async () => {
     const { getByTestId, findByDisplayValue } = render(<App />);
     const emailInput = getByTestId("email");
+
     fireEvent.change(emailInput, { target: { value: "foo@bar.com" } });
     await findByDisplayValue("foo@bar.com");
     //* Uncomment to see a failing test
@@ -24,21 +33,25 @@ describe("RuxInput", () => {
     //   findByDisplayValue("foo@barr.com");
     // });
   });
+  test("Should render error-text", async () => {
+    const { getByTestId } = render(<App />);
+    const input = getByTestId("email");
+    //? I have no clue why this doesn't work.
+    expect(input).toHaveAttribute("error-text");
+    fireEvent.change(input, { target: { value: "@" } });
+    //? This prints '@' like it should.
+    console.log((input as HTMLInputElement).value, "VAL");
+    expect(input).not.toHaveAttribute("error-text");
+
+    // expect(input).toHaveAttribute("error-text");
+  });
 });
-describe("RegularInput", () => {
-  test("Reg input works", async () => {
+describe("RuxButton", () => {
+  test("Hears a fireEvent click", async () => {
     const { getByTestId, findByDisplayValue } = render(<App />);
-    const regInput = getByTestId("reg");
+    const btn = getByTestId("rux-btn");
 
-    // fireEvent.change(regInput, { target: { value: "Hello" } });
-    // expect(regInput).toHaveValue("Hello");
-
-    await act(async () => {
-      fireEvent.change(regInput, { target: { value: "foo@bar.com" } });
-    });
-    //! Will always pass
-    await waitFor(() => {
-      findByDisplayValue("foo@barr.com");
-    });
+    fireEvent.click(btn);
+    await findByDisplayValue("Clicked!");
   });
 });

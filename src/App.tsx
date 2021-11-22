@@ -1,17 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import logo from "./logo.svg";
 import "./App.css";
-import { RuxInput } from "@astrouxds/react";
+import { RuxButton, RuxInput } from "@astrouxds/react";
 
 function App() {
   const [email, setEmail] = useState("");
   const [input, setInput] = useState("");
+  const [valid, setValid] = useState(false);
+  const [clicked, setClicked] = useState(false);
 
   function handleSubmit() {
     alert(`
       Email: ${email}
     `);
   }
+  useEffect(() => {
+    if (email && email.includes("@")) {
+      setValid(true);
+    } else setValid(false);
+  }, [email]);
 
   return (
     <div className="App">
@@ -26,26 +33,27 @@ function App() {
           label="Email Address"
           value={email}
           onRuxinput={(e: CustomEvent<HTMLRuxInputElement>) => {
-            console.log("RUX INPUT~~~");
             const target = e.target as HTMLInputElement;
             setEmail(target.value);
           }}
           name="email"
+          error-text={valid ? undefined : "Enter a valid email address."}
         />
-        <label>Test</label>
-        <input
-          type="text"
-          data-testid="reg"
-          aria-label="reg"
-          name="first"
-          value={input}
-          aria-labelledby="Test"
-          onChange={(e) => setInput(e.target.value)}
-        />
+
         <button type="submit" data-testid="btn">
           Submit
         </button>
       </form>
+      <RuxButton
+        data-testid="rux-btn"
+        onClick={() => {
+          setClicked(!clicked);
+        }}
+      >
+        Rux Button
+      </RuxButton>
+
+      {clicked && <textarea data-testid="text-area">Clicked!</textarea>}
     </div>
   );
 }
