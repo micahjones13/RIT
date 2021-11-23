@@ -1,19 +1,9 @@
 import React from "react";
-import {
-  render,
-  act,
-  waitFor,
-  getByLabelText,
-  getByText,
-  findByDisplayValue,
-  waitForElementToBeRemoved,
-  queryByAttribute,
-} from "@testing-library/react";
-import { ruxFireEvent as fireEvent } from "../utils";
+import { render, fireEvent } from "@testing-library/react";
+import { screen, within } from "testing-library__dom";
 
 import App from "../App";
 
-// Also want error-text to show up in tests when applicable
 describe("RuxInput", () => {
   test("Should change with fireEvent", async () => {
     const { getByTestId, findByDisplayValue } = render(<App />);
@@ -25,7 +15,7 @@ describe("RuxInput", () => {
     // await findByDisplayValue("foo@.com");
     expect(emailInput).toHaveValue("foo@bar.com");
 
-    //! Will always pass
+    //! Will always pass - overlapping act calls warning
     // await act(async () => {
     //   fireEvent.change(emailInput, { target: { value: "foo@bar.com" } });
     // });
@@ -33,17 +23,29 @@ describe("RuxInput", () => {
     //   findByDisplayValue("foo@barr.com");
     // });
   });
+  /**
+   * This one is tricky - In RuxInput in the example <App /> defaults to error-text being rendered if no '@' is present.
+   * You can find that it is there by default, but using a fireEvent.change will update the input but the errorText will still contain the error-text div, even
+   * when re-queried.
+   */
   test("Should render error-text", async () => {
-    const { getByTestId } = render(<App />);
-    const input = getByTestId("email");
-    //? I have no clue why this doesn't work.
-    expect(input).toHaveAttribute("error-text");
-    fireEvent.change(input, { target: { value: "@" } });
-    //? This prints '@' like it should.
-    console.log((input as HTMLInputElement).value, "VAL");
-    expect(input).not.toHaveAttribute("error-text");
+    render(<App />);
+    const input = screen.getByTestId("email");
+    let errorText = await within(input).findAllByText(
+      "Enter a valid email address."
+    );
+    expect(errorText).not.toBeNull();
+  });
 
-    // expect(input).toHaveAttribute("error-text");
+  test("Can get a RuxInput by labelText", async () => {
+    render(<App />);
+    const input = await screen.findByLabelText("Email Address"); //Works
+    const getInput = screen.getByTestId("email");
+    const shadowInput = within(getInput).getByLabelText("Email Address");
+    console.log(shadowInput, "shadowInput from getByLabelText");
+    console.log(input, "input from findByLabelText");
+    expect(input).not.toBeNull();
+    expect(shadowInput).not.toBeNull();
   });
 });
 describe("RuxButton", () => {
@@ -52,6 +54,7 @@ describe("RuxButton", () => {
     const btn = getByTestId("rux-btn");
 
     fireEvent.click(btn);
+    //* Using a textarea to render the "Clicked!" message, since findByDispalyValue has strict element parameters: https://testing-library.com/docs/queries/bydisplayvalue
     await findByDisplayValue("Clicked!");
   });
 });
