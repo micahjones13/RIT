@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
-import logo from "./logo.svg";
 import "./App.css";
 import { RuxButton, RuxInput } from "@astrouxds/react";
 
 function App() {
   const [email, setEmail] = useState("");
-  const [input, setInput] = useState("");
   const [valid, setValid] = useState(false);
   const [clicked, setClicked] = useState(false);
 

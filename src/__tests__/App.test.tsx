@@ -4,6 +4,14 @@ import { screen, within } from "testing-library__dom";
 
 import App from "../App";
 
+/**
+ * Goals:
+ *  - RuxInput's value changes when firEvent.change is used
+ *  - Error text div is rendered and can be tested for
+ *  - Input can be found by label text
+ *  - fireEvent.click works with RuxButton
+ */
+
 describe("RuxInput", () => {
   test("Should change with fireEvent", async () => {
     const { getByTestId, findByDisplayValue } = render(<App />);
@@ -20,13 +28,11 @@ describe("RuxInput", () => {
     //   fireEvent.change(emailInput, { target: { value: "foo@bar.com" } });
     // });
     // await waitFor(() => {
-    //   findByDisplayValue("foo@barr.com");
+    //   findByDisplayValue("shouldfail@fail.com");
     // });
   });
   /**
-   * This one is tricky - In RuxInput in the example <App /> defaults to error-text being rendered if no '@' is present.
-   * You can find that it is there by default, but using a fireEvent.change will update the input but the errorText will still contain the error-text div, even
-   * when re-queried.
+   *  This simply finds the error text within the input.
    */
   test("Should render error-text", async () => {
     render(<App />);
@@ -39,8 +45,10 @@ describe("RuxInput", () => {
 
   test("Can get a RuxInput by labelText", async () => {
     render(<App />);
-    const input = await screen.findByLabelText("Email Address"); //Works
+    //* using screnn from testing-library__dom allows the findByLabelText to get through the shadow DOM
+    const input = await screen.findByLabelText("Email Address");
     const getInput = screen.getByTestId("email");
+    //* This shows that it's possible to getByLabelText, but this approach requires you to already have the RuxInput found, so it's a bit redundant
     const shadowInput = within(getInput).getByLabelText("Email Address");
     console.log(shadowInput, "shadowInput from getByLabelText");
     console.log(input, "input from findByLabelText");
